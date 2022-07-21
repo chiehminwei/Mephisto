@@ -22,6 +22,11 @@ jobs:
             mephisto/operations
             mephisto/tools
             packages/mephisto-task/src
+      - name: List all added files
+        run: |
+          for file in ${{ steps.static-react-task.outputs.modified_files }}; do
+            echo "$file was added"
+          done
       - name: Set output for static-react-task
         id: static-react-task_output
         if: steps.static-react-task.outputs.any_changed == 'true'

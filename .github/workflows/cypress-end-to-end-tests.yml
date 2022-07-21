@@ -16,12 +16,12 @@ jobs:
         uses: tj-actions/changed-files@v23.1
         with:
           files: |
-            examples/static_react_task/
-            mephisto/abstractions/
-            mephisto/data_model/
-            mephisto/operations/
-            mephisto/tools/
-            packages/mephisto-task/src/
+            examples/static_react_task/**
+            mephisto/abstractions/**
+            mephisto/data_model/**
+            mephisto/operations/**
+            mephisto/tools/**
+            packages/mephisto-task/src/**
       - name: List all modified files
         run: |
           for file in ${{ steps.static-react-task.outputs.modified_files }}; do

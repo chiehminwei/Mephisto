@@ -1,6 +1,7 @@
 name: cypress-end-to-end-tests
 on:
   pull_request:
+
   push:
     branches: [add-path-filters-to-cypress-tests]
 
@@ -24,7 +25,7 @@ jobs:
       # For pull requests it's not necessary to checkout the code
       - uses: actions/checkout@v3
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 2
       - uses: dorny/paths-filter@v2
         id: filter
         with:

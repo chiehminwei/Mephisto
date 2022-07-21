@@ -95,8 +95,8 @@ jobs:
           headless: true
 
   remote_procedure_template:
+    if: ${{ (needs.changes.outputs.template == 'true') || (needs.changes.outputs.mephisto-task == 'true') || (needs.changes.outputs.abstractions == 'true') || (needs.changes.outputs.data_model == 'true') || (needs.changes.outputs.operations == 'true') || (needs.changes.outputs.tools == 'true')}}
     runs-on: ubuntu-latest
-
     steps:
       - name: 🔀 Checking out repo
         uses: actions/checkout@v2
@@ -138,8 +138,8 @@ jobs:
           headless: true
 
   remote_procedure_mnist:
+    if: ${{ (needs.changes.outputs.mnist == 'true') || (needs.changes.outputs.mephisto-task == 'true') || (needs.changes.outputs.abstractions == 'true') || (needs.changes.outputs.data_model == 'true') || (needs.changes.outputs.operations == 'true') || (needs.changes.outputs.tools == 'true')}}
     runs-on: ubuntu-latest
-
     steps:
       - name: 🔀 Checking out repo
         uses: actions/checkout@v2
@@ -183,8 +183,8 @@ jobs:
           headless: true
 
   remote_procedure_toxicity_detection:
+    if: ${{ (needs.changes.outputs.toxicity_detection == 'true') || (needs.changes.outputs.mephisto-task == 'true') || (needs.changes.outputs.abstractions == 'true') || (needs.changes.outputs.data_model == 'true') || (needs.changes.outputs.operations == 'true') || (needs.changes.outputs.tools == 'true')}}
     runs-on: ubuntu-latest
-
     steps:
       - name: 🔀 Checking out repo
         uses: actions/checkout@v2
@@ -226,8 +226,8 @@ jobs:
           headless: true
 
   static_react_task_with_tips:
+    if: ${{ (needs.changes.outputs.static_react_task_with_tips == 'true') || (needs.changes.outputs.mephisto-task == 'true') || (needs.changes.outputs.mephisto-worker-addons == 'true') || (needs.changes.outputs.abstractions == 'true') || (needs.changes.outputs.data_model == 'true') || (needs.changes.outputs.operations == 'true') || (needs.changes.outputs.tools == 'true')}}
     runs-on: ubuntu-latest
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       - name: 🔀 Checking out repo
         uses: actions/checkout@v2

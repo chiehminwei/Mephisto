@@ -6,64 +6,54 @@ on:
     branches: [add-path-filters-to-cypress-tests]
 
 jobs:
-  changes:
+  changed-files-static-react-task:
+    name: Check for changed files
     runs-on: ubuntu-latest
-    # Set job outputs to values from filter step
-    outputs:
-      static_react_task: ${{ steps.filter.outputs.static_react_task }}
-      static_react_task_with_tips: ${{ steps.filter.outputs.static_react_task_with_tips }}
-      mnist: ${{ steps.filter.outputs.mnist }}
-      template: ${{ steps.filter.outputs.template }}
-      toxicity_detection: ${{ steps.filter.outputs.toxicity_detection }}
-      abstractions: ${{ steps.filter.outputs.abstractions }}
-      data_model: ${{ steps.filter.outputs.data_model }}
-      operations: ${{ steps.filter.outputs.operations }}
-      tools: ${{ steps.filter.outputs.tools }}
-      mephisto-task: ${{ steps.filter.outputs.mephisto-task }}
-      mephisto-worker-addons: ${{ steps.filter.outputs.mephisto-worker-addons }}
     steps:
-      # For pull requests it's not necessary to checkout the code
       - uses: actions/checkout@v3
         with:
           fetch-depth: 2
-      - uses: dorny/paths-filter@v2
-        id: filter
+      - name: Check if changed files for static-react-task
+        id: static-react-task
+        uses: tj-actions/changed-files@v23.1
         with:
-          filters: |
-            static_react_task:
-              - 'examples/static_react_task/**'
-            static_react_task_with_tips:
-              - 'examples/static_react_task_with_tips/**'
-            mnist:
-              - 'examples/remote_procedure/mnist/**'
-            template:
-              - 'examples/remote_procedure/template/**'
-            toxicity_detection:
-              - 'examples/remote_procedure/toxicity_detection/**'
-            abstractions:
-              - 'mephisto/abstractions/**'
-            data_model:
-              - 'mephisto/data_model/**'
-            operations:
-              - 'mephisto/operations/**'
-            tools:
-              - 'mephisto/tools/**'
-            mephisto-task:
-              - 'packages/mephisto-task/src/**'
-            mephisto-worker-addons:
-              - 'packages/mephisto-worker-addons/src/**'
+          files: |
+            examples/static_react_task
+            mephisto/abstractions
+            mephisto/data_model
+            mephisto/operations
+            mephisto/tools
+            packages/mephisto-task/src
+      - name: Set output for static-react-task
+        id: static-react-task_output
+        if: steps.static-react-task.outputs.any_changed == 'true'
+        run: |
+          echo "::set-output name=any_changed::true"
+    outputs:
+      static-react-task: steps.static-react-task_output.outputs.any_changed
 
   static-react-task:
-    needs: changes
-    if: ${{ (needs.changes.outputs.static_react_task == 'true') || (needs.changes.outputs.mephisto-task == 'true') || (needs.changes.outputs.abstractions == 'true') || (needs.changes.outputs.data_model == 'true') || (needs.changes.outputs.operations == 'true') || (needs.changes.outputs.tools == 'true')}}
+    needs: [changed-files-static-react-task]
+    if: needs.changed-files-static-react-task.outputs.static-react-task
     runs-on: ubuntu-latest
     steps:
       - name: 🔀 Checking out repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: 🐍 Installing python
         uses: actions/setup-python@v2
 
+      - name: Get specific changed files
+        id: changed-files-specific
+        uses: tj-actions/changed-files@v23.2
+        with:
+          files: |
+            examples/static_react_task
+            mephisto/abstractions
+            mephisto/data_model
+            mephisto/operations
+            mephisto/tools
+            packages/mephisto-task/src
       - name: 🪨 Setup Node
         uses: actions/setup-node@v1
         with:
@@ -98,8 +88,6 @@ jobs:
           headless: true
 
   remote_procedure_template:
-    needs: changes
-    if: ${{ (needs.changes.outputs.template == 'true') || (needs.changes.outputs.mephisto-task == 'true') || (needs.changes.outputs.abstractions == 'true') || (needs.changes.outputs.data_model == 'true') || (needs.changes.outputs.operations == 'true') || (needs.changes.outputs.tools == 'true')}}
     runs-on: ubuntu-latest
     steps:
       - name: 🔀 Checking out repo
@@ -142,8 +130,6 @@ jobs:
           headless: true
 
   remote_procedure_mnist:
-    needs: changes
-    if: ${{ (needs.changes.outputs.mnist == 'true') || (needs.changes.outputs.mephisto-task == 'true') || (needs.changes.outputs.abstractions == 'true') || (needs.changes.outputs.data_model == 'true') || (needs.changes.outputs.operations == 'true') || (needs.changes.outputs.tools == 'true')}}
     runs-on: ubuntu-latest
     steps:
       - name: 🔀 Checking out repo
@@ -188,8 +174,6 @@ jobs:
           headless: true
 
   remote_procedure_toxicity_detection:
-    needs: changes
-    if: ${{ (needs.changes.outputs.toxicity_detection == 'true') || (needs.changes.outputs.mephisto-task == 'true') || (needs.changes.outputs.abstractions == 'true') || (needs.changes.outputs.data_model == 'true') || (needs.changes.outputs.operations == 'true') || (needs.changes.outputs.tools == 'true')}}
     runs-on: ubuntu-latest
     steps:
       - name: 🔀 Checking out repo
@@ -232,8 +216,6 @@ jobs:
           headless: true
 
   static_react_task_with_tips:
-    needs: changes
-    if: ${{ (needs.changes.outputs.static_react_task_with_tips == 'true') || (needs.changes.outputs.mephisto-task == 'true') || (needs.changes.outputs.mephisto-worker-addons == 'true') || (needs.changes.outputs.abstractions == 'true') || (needs.changes.outputs.data_model == 'true') || (needs.changes.outputs.operations == 'true') || (needs.changes.outputs.tools == 'true')}}
     runs-on: ubuntu-latest
     steps:
       - name: 🔀 Checking out repo

@@ -6,58 +6,63 @@ on:
     branches: [add-path-filters-to-cypress-tests]
 
 jobs:
-  changed-files-static-react-task:
-    name: 🔎 Check for changed files for static-react-task
+  changes:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Check if changed files for static-react-task
-        id: static-react-task
-        uses: tj-actions/changed-files@v23.1
-        with:
-          files: |
-            examples/static_react_task/**
-            mephisto/abstractions/**
-            mephisto/data_model/**
-            mephisto/operations/**
-            mephisto/tools/**
-            packages/mephisto-task/src/**
-      - name: List all modified files
-        run: |
-          for file in ${{ steps.static-react-task.outputs.modified_files }}; do
-            echo "$file was modified"
-          done
-      - name: Set output for static-react-task
-        id: static-react-task_output
-        if: steps.static-react-task.outputs.any_changed == 'true'
-        run: |
-          echo "files changed"
-          echo "::set-output name=any_changed::true"
+    # Set job outputs to values from filter step
     outputs:
-      static-react-task: steps.static-react-task_output.outputs.any_changed
+      static_react_task: ${{ steps.filter.outputs.static_react_task }}
+      static_react_task_with_tips: ${{ steps.filter.outputs.static_react_task_with_tips }}
+      mnist: ${{ steps.filter.outputs.mnist }}
+      template: ${{ steps.filter.outputs.template }}
+      toxicity_detection: ${{ steps.filter.outputs.toxicity_detection }}
+      abstractions: ${{ steps.filter.outputs.abstractions }}
+      data_model: ${{ steps.filter.outputs.data_model }}
+      operations: ${{ steps.filter.outputs.operations }}
+      tools: ${{ steps.filter.outputs.tools }}
+      mephisto-task: ${{ steps.filter.outputs.mephisto-task }}
+      mephisto-worker-addons: ${{ steps.filter.outputs.mephisto-worker-addons }}
+    steps:
+      # For pull requests it's not necessary to checkout the code
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            static_react_task:
+              - 'examples/static_react_task/**'
+            static_react_task_with_tips:
+              - 'examples/static_react_task_with_tips/**'
+            mnist:
+              - 'examples/remote_procedure/mnist/**'
+            template:
+              - 'examples/remote_procedure/template/**'
+            toxicity_detection:
+              - 'examples/remote_procedure/toxicity_detection/**'
+            abstractions:
+              - 'mephisto/abstractions/**'
+            data_model:
+              - 'mephisto/data_model/**'
+            operations:
+              - 'mephisto/operations/**'
+            tools:
+              - 'mephisto/tools/**'
+            mephisto-task:
+              - 'packages/mephisto-task/src/**'
+            mephisto-worker-addons:
+              - 'packages/mephisto-worker-addons/src/**'
 
   static-react-task:
-    needs: [changed-files-static-react-task]
-    if: ${{ needs.changed-files-static-react-task.outputs.static-react-task == 'true' }}
+    needs: changes
+    if: ${{ (needs.changes.outputs.static_react_task == 'true') || (needs.changes.outputs.mephisto-task == 'true') || (needs.changes.outputs.abstractions == 'true') || (needs.changes.outputs.data_model == 'true') || (needs.changes.outputs.operations == 'true') || (needs.changes.outputs.tools == 'true')}}
     runs-on: ubuntu-latest
     steps:
       - name: 🔀 Checking out repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
 
       - name: 🐍 Installing python
         uses: actions/setup-python@v2
-
-      - name: Get specific changed files
-        id: changed-files-specific
-        uses: tj-actions/changed-files@v23.2
-        with:
-          files: |
-            examples/static_react_task
-            mephisto/abstractions
-            mephisto/data_model
-            mephisto/operations
-            mephisto/tools
-            packages/mephisto-task/src
 
       - name: 🪨 Setup Node
         uses: actions/setup-node@v1
@@ -92,38 +97,9 @@ jobs:
           command-prefix: yarn dlx
           headless: true
 
-  changed-files-template:
-    name: 🔎 Check for changed files for template
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Check if changed files for template
-        id: template
-        uses: tj-actions/changed-files@v23.1
-        with:
-          files: |
-            examples/remote_procedure/template
-            mephisto/abstractions
-            mephisto/data_model
-            mephisto/operations
-            mephisto/tools
-            packages/mephisto-task/src
-      - name: List all modified files
-        run: |
-          for file in ${{ steps.template.outputs.modified_files }}; do
-            echo "$file was modified"
-          done
-      - name: Set output for template
-        id: template_output
-        if: steps.template.outputs.any_changed == 'true'
-        run: |
-          echo "::set-output name=any_changed::true"
-    outputs:
-      template: steps.template_output.outputs.any_changed
-
   remote_procedure_template:
-    needs: [changed-files-template]
-    if: needs.changed-files-template.outputs.static-react-task == 'true'
+    needs: changes
+    if: ${{ (needs.changes.outputs.template == 'true') || (needs.changes.outputs.mephisto-task == 'true') || (needs.changes.outputs.abstractions == 'true') || (needs.changes.outputs.data_model == 'true') || (needs.changes.outputs.operations == 'true') || (needs.changes.outputs.tools == 'true')}}
     runs-on: ubuntu-latest
     steps:
       - name: 🔀 Checking out repo
@@ -165,215 +141,221 @@ jobs:
           command-prefix: yarn dlx
           headless: true
 
-  # remote_procedure_mnist:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: 🔀 Checking out repo
-  #       uses: actions/checkout@v2
+  remote_procedure_mnist:
+    needs: changes
+    if: ${{ (needs.changes.outputs.mnist == 'true') || (needs.changes.outputs.mephisto-task == 'true') || (needs.changes.outputs.abstractions == 'true') || (needs.changes.outputs.data_model == 'true') || (needs.changes.outputs.operations == 'true') || (needs.changes.outputs.tools == 'true')}}
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🔀 Checking out repo
+        uses: actions/checkout@v2
 
-  #     - name: 🐍 Installing python
-  #       uses: actions/setup-python@v2
+      - name: 🐍 Installing python
+        uses: actions/setup-python@v2
 
-  #     - name: 🪨 Setup Node
-  #       uses: actions/setup-node@v1
-  #       with:
-  #         node-version: 16
+      - name: 🪨 Setup Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 16
 
-  #     - name: 🤖 Install Mephisto
-  #       run: |
-  #         pip install -e .
-  #         pip install torch pillow numpy
+      - name: 🤖 Install Mephisto
+        run: |
+          pip install -e .
+          pip install torch pillow numpy
 
-  #     - name: 🖋 Create data directory
-  #       run: mkdir -p ~/mephisto/data
+      - name: 🖋 Create data directory
+        run: mkdir -p ~/mephisto/data
 
-  #     - name: 📂 Set the data directory
-  #       run: mephisto config core.main_data_directory ~/mephisto/data
+      - name: 📂 Set the data directory
+        run: mephisto config core.main_data_directory ~/mephisto/data
 
-  #     - name: 📦 Setting up mephisto-task package
-  #       run: |
-  #         cd packages/mephisto-task
-  #         yarn install
-  #         yarn build
-  #         npm link
+      - name: 📦 Setting up mephisto-task package
+        run: |
+          cd packages/mephisto-task
+          yarn install
+          yarn build
+          npm link
 
-  #     - name: ⌛️ Running cypress tests
-  #       uses: cypress-io/github-action@v3.1.0
-  #       with:
-  #         install: false
-  #         browser: chrome
-  #         project: ./examples/remote_procedure/mnist/webapp
-  #         config-file: ./cypress.config.js
-  #         start: python examples/remote_procedure/mnist/run_task.py mephisto.task.post_install_script=link_mephisto_task.sh
-  #         wait-on: "http://localhost:3000/?worker_id=x&assignment_id=1"
-  #         command-prefix: yarn dlx
-  #         headless: true
+      - name: ⌛️ Running cypress tests
+        uses: cypress-io/github-action@v3.1.0
+        with:
+          install: false
+          browser: chrome
+          project: ./examples/remote_procedure/mnist/webapp
+          config-file: ./cypress.config.js
+          start: python examples/remote_procedure/mnist/run_task.py mephisto.task.post_install_script=link_mephisto_task.sh
+          wait-on: "http://localhost:3000/?worker_id=x&assignment_id=1"
+          command-prefix: yarn dlx
+          headless: true
 
-  # remote_procedure_toxicity_detection:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: 🔀 Checking out repo
-  #       uses: actions/checkout@v2
+  remote_procedure_toxicity_detection:
+    needs: changes
+    if: ${{ (needs.changes.outputs.toxicity_detection == 'true') || (needs.changes.outputs.mephisto-task == 'true') || (needs.changes.outputs.abstractions == 'true') || (needs.changes.outputs.data_model == 'true') || (needs.changes.outputs.operations == 'true') || (needs.changes.outputs.tools == 'true')}}
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🔀 Checking out repo
+        uses: actions/checkout@v2
 
-  #     - name: 🐍 Installing python
-  #       uses: actions/setup-python@v2
+      - name: 🐍 Installing python
+        uses: actions/setup-python@v2
 
-  #     - name: 🪨 Setup Node
-  #       uses: actions/setup-node@v1
-  #       with:
-  #         node-version: 16
+      - name: 🪨 Setup Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 16
 
-  #     - name: 🤖 Install Mephisto
-  #       run: pip install -e .
+      - name: 🤖 Install Mephisto
+        run: pip install -e .
 
-  #     - name: 🖋 Create data directory
-  #       run: mkdir -p ~/mephisto/data
+      - name: 🖋 Create data directory
+        run: mkdir -p ~/mephisto/data
 
-  #     - name: 📂 Set the data directory
-  #       run: mephisto config core.main_data_directory ~/mephisto/data
+      - name: 📂 Set the data directory
+        run: mephisto config core.main_data_directory ~/mephisto/data
 
-  #     - name: 📦 Setting up mephisto-task package
-  #       run: |
-  #         cd packages/mephisto-task
-  #         yarn install
-  #         yarn build
-  #         npm link
+      - name: 📦 Setting up mephisto-task package
+        run: |
+          cd packages/mephisto-task
+          yarn install
+          yarn build
+          npm link
 
-  #     - name: ⌛️ Running cypress tests
-  #       uses: cypress-io/github-action@v3.1.0
-  #       with:
-  #         install: false
-  #         browser: chrome
-  #         project: ./examples/remote_procedure/toxicity_detection/webapp
-  #         config-file: ./cypress.config.js
-  #         start: python examples/remote_procedure/toxicity_detection/run_task.py mephisto.task.post_install_script=link_mephisto_task.sh
-  #         wait-on: "http://localhost:3000/?worker_id=x&assignment_id=1"
-  #         command-prefix: yarn dlx
-  #         headless: true
+      - name: ⌛️ Running cypress tests
+        uses: cypress-io/github-action@v3.1.0
+        with:
+          install: false
+          browser: chrome
+          project: ./examples/remote_procedure/toxicity_detection/webapp
+          config-file: ./cypress.config.js
+          start: python examples/remote_procedure/toxicity_detection/run_task.py mephisto.task.post_install_script=link_mephisto_task.sh
+          wait-on: "http://localhost:3000/?worker_id=x&assignment_id=1"
+          command-prefix: yarn dlx
+          headless: true
 
-  # static_react_task_with_tips:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: 🔀 Checking out repo
-  #       uses: actions/checkout@v2
-  #     - name: 🐍 Installing python
-  #       uses: actions/setup-python@v2
+  static_react_task_with_tips:
+    needs: changes
+    if: ${{ (needs.changes.outputs.static_react_task_with_tips == 'true') || (needs.changes.outputs.mephisto-task == 'true') || (needs.changes.outputs.mephisto-worker-addons == 'true') || (needs.changes.outputs.abstractions == 'true') || (needs.changes.outputs.data_model == 'true') || (needs.changes.outputs.operations == 'true') || (needs.changes.outputs.tools == 'true')}}
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🔀 Checking out repo
+        uses: actions/checkout@v2
+      - name: 🐍 Installing python
+        uses: actions/setup-python@v2
 
-  #     - name: 🪨 Setup Node
-  #       uses: actions/setup-node@v1
-  #       with:
-  #         node-version: 16
+      - name: 🪨 Setup Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 16
 
-  #     - name: 🤖 Install Mephisto
-  #       run: |
-  #         pip install -e .
-  #         pip uninstall detoxify <<EOF
-  #         y
-  #         EOF
+      - name: 🤖 Install Mephisto
+        run: |
+          pip install -e .
+          pip uninstall detoxify <<EOF
+          y
+          EOF
 
-  #     - name: 🖋 Create data directory
-  #       run: mkdir -p ~/mephisto/data
+      - name: 🖋 Create data directory
+        run: mkdir -p ~/mephisto/data
 
-  #     - name: 📂 Set the data directory
-  #       run: mephisto config core.main_data_directory ~/mephisto/data
+      - name: 📂 Set the data directory
+        run: mephisto config core.main_data_directory ~/mephisto/data
 
-  #     - name: 📦 Setting up mephisto-task package
-  #       run: |
-  #         cd packages/mephisto-task
-  #         yarn install
-  #         yarn build
-  #         npm link
+      - name: 📦 Setting up mephisto-task package
+        run: |
+          cd packages/mephisto-task
+          yarn install
+          yarn build
+          npm link
 
-  #     - name: 📦 Setting up mephisto-worker-addons package
-  #       run: |
-  #         cd packages/mephisto-worker-addons
-  #         yarn install
-  #         yarn build
-  #         npm link
+      - name: 📦 Setting up mephisto-worker-addons package
+        run: |
+          cd packages/mephisto-worker-addons
+          yarn install
+          yarn build
+          npm link
 
-  #     - name: ⌛️ Running pre-submission cypress tests
-  #       uses: cypress-io/github-action@v3.1.0
-  #       with:
-  #         install: false
-  #         browser: chrome
-  #         project: ./examples/static_react_task_with_tips/webapp
-  #         config-file: ./cypress.config.js
-  #         spec: ./examples/static_react_task_with_tips/webapp/cypress/e2e/pre_submission_tests/*
-  #         start: python examples/static_react_task_with_tips/run_task.py mephisto.task.force_rebuild=true mephisto.task.post_install_script=link_packages.sh
-  #         wait-on: "http://localhost:3000/?worker_id=x&assignment_id=1"
-  #         command-prefix: yarn dlx
-  #         headless: true
+      - name: ⌛️ Running pre-submission cypress tests
+        uses: cypress-io/github-action@v3.1.0
+        with:
+          install: false
+          browser: chrome
+          project: ./examples/static_react_task_with_tips/webapp
+          config-file: ./cypress.config.js
+          spec: ./examples/static_react_task_with_tips/webapp/cypress/e2e/pre_submission_tests/*
+          start: python examples/static_react_task_with_tips/run_task.py mephisto.task.force_rebuild=true mephisto.task.post_install_script=link_packages.sh
+          wait-on: "http://localhost:3000/?worker_id=x&assignment_id=1"
+          command-prefix: yarn dlx
+          headless: true
 
-  #     - name: 🔪 Killing the web server
-  #       run: |
-  #         lsof -nPi :3000
-  #         lsof -i -P -n | grep LISTEN | grep python | awk '{print $2}'
-  #         kill -INT $(lsof -i -P -n | grep LISTEN | grep python | awk '{print $2}')
-  #         echo "killed 1"
-  #         sleep 0.5
-  #         kill -INT $(lsof -i -P -n | grep LISTEN | grep python | awk '{print $2}')
-  #         echo "killed 2"
-  #         lsof -i -P -n | grep LISTEN | grep node | awk '{print $2}'
-  #         kill -INT $(lsof -i -P -n | grep LISTEN | grep node | awk '{print $2}')
-  #         sleep 30
-  #         echo "30 seconds passed"
+      - name: 🔪 Killing the web server
+        run: |
+          lsof -nPi :3000
+          lsof -i -P -n | grep LISTEN | grep python | awk '{print $2}'
+          kill -INT $(lsof -i -P -n | grep LISTEN | grep python | awk '{print $2}')
+          echo "killed 1"
+          sleep 0.5
+          kill -INT $(lsof -i -P -n | grep LISTEN | grep python | awk '{print $2}')
+          echo "killed 2"
+          lsof -i -P -n | grep LISTEN | grep node | awk '{print $2}'
+          kill -INT $(lsof -i -P -n | grep LISTEN | grep node | awk '{print $2}')
+          sleep 30
+          echo "30 seconds passed"
 
-  #     - name: 🥛 Expiring units
-  #       run: |
-  #         cd mephisto/scripts/local_db/gh_actions
-  #         python expire_all_units.py
+      - name: 🥛 Expiring units
+        run: |
+          cd mephisto/scripts/local_db/gh_actions
+          python expire_all_units.py
 
-  #     - name: 📚 Accepting the first submitted tip, accepting the second submitted tip, and rejecting the last submitted tip
-  #       run: |
-  #         cd mephisto/scripts/local_db
-  #         python review_tips_for_task.py << EOF
-  #         react-static-task-with-tips
-  #         a
-  #         5
-  #         The tip is very informative
-  #         a
-  #         0
-  #         r
-  #         EOF
+      - name: 📚 Accepting the first submitted tip, accepting the second submitted tip, and rejecting the last submitted tip
+        run: |
+          cd mephisto/scripts/local_db
+          python review_tips_for_task.py << EOF
+          react-static-task-with-tips
+          a
+          5
+          The tip is very informative
+          a
+          0
+          r
+          EOF
 
-  #     - name: 🔥 Removing the second accepted tip
-  #       run: |
-  #         cd mephisto/scripts/local_db
-  #         python remove_accepted_tip.py << EOF
-  #         react-static-task-with-tips
-  #         n
-  #         y
-  #         EOF
+      - name: 🔥 Removing the second accepted tip
+        run: |
+          cd mephisto/scripts/local_db
+          python remove_accepted_tip.py << EOF
+          react-static-task-with-tips
+          n
+          y
+          EOF
 
-  #     - name: 📖 Reviewing the accepted feedback
-  #       run: |
-  #         cd mephisto/scripts/local_db
-  #         python review_feedback_for_task.py << EOF
-  #         react-static-task-with-tips
-  #         0
-  #         n
-  #         u
-  #         y
-  #         y
-  #         EOF
-  #         python review_feedback_for_task.py << EOF
-  #         react-static-task-with-tips
-  #         1
-  #         n
-  #         u
-  #         y
-  #         n
-  #         EOF
+      - name: 📖 Reviewing the accepted feedback
+        run: |
+          cd mephisto/scripts/local_db
+          python review_feedback_for_task.py << EOF
+          react-static-task-with-tips
+          0
+          n
+          u
+          y
+          y
+          EOF
+          python review_feedback_for_task.py << EOF
+          react-static-task-with-tips
+          1
+          n
+          u
+          y
+          n
+          EOF
 
-  #     - name: ⌛️ Running post-submission cypress tests
-  #       uses: cypress-io/github-action@v3.1.0
-  #       with:
-  #         install: false
-  #         project: ./examples/static_react_task_with_tips/webapp
-  #         config-file: cypress.config.js
-  #         spec: ./examples/static_react_task_with_tips/webapp/cypress/e2e/post_submission_tests/*
-  #         start: python examples/static_react_task_with_tips/run_task.py mephisto.task.post_install_script=link_packages.sh mephisto.task.force_rebuild=true
-  #         wait-on: "http://localhost:3000/?worker_id=x&assignment_id=1"
-  #         command-prefix: yarn dlx
-  #         browser: chrome
-  #         headless: true
+      - name: ⌛️ Running post-submission cypress tests
+        uses: cypress-io/github-action@v3.1.0
+        with:
+          install: false
+          project: ./examples/static_react_task_with_tips/webapp
+          config-file: cypress.config.js
+          spec: ./examples/static_react_task_with_tips/webapp/cypress/e2e/post_submission_tests/*
+          start: python examples/static_react_task_with_tips/run_task.py mephisto.task.post_install_script=link_packages.sh mephisto.task.force_rebuild=true
+          wait-on: "http://localhost:3000/?worker_id=x&assignment_id=1"
+          command-prefix: yarn dlx
+          browser: chrome
+          headless: true

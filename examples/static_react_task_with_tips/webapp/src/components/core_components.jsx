@@ -75,6 +75,7 @@ function SimpleFrontend({ taskData, isOnboarding, onSubmit, onError }) {
               </button>
             </div>
           </div>
+          {/* bob */}
 
           <div style={{ marginTop: "15rem", width: "fit-content" }}>
             <Tips

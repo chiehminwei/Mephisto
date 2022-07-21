@@ -15,7 +15,7 @@ Then adding the following to inside your BaseFrontend should show the tips butto
 To see some of the other props of the Tips component see the 
 [mephisto-worker-addons readme](https://github.com/facebookresearch/Mephisto/blob/add-tips-example/packages/mephisto-worker-addons/README.md)
 
-Once a/ worker submits a tip from the popup that shows when clicking on the tips button, then these tips can be reviewed to either accept or reject them.
+Once a worker submits a tip from the popup that shows when clicking on the tips button, then these tips can be reviewed to either accept or reject them.
 
 This can be done by running the [review_tips_for_task.py](https://github.com/facebookresearch/Mephisto/blob/add-tips-example/mephisto/scripts/local_db/review_tips_for_task.py) script and following the instructions. If a tip is accepted, then running python run_task.py on this task should show the accepted tip when opening the tips popup.
 

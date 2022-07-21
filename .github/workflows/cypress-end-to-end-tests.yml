@@ -7,7 +7,7 @@ on:
 
 jobs:
   changed-files-static-react-task:
-    name: Check for changed files
+    name: 🔎 Check for changed files for static-react-task
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -22,10 +22,10 @@ jobs:
             mephisto/operations
             mephisto/tools
             packages/mephisto-task/src
-      - name: List all added files
+      - name: List all modified files
         run: |
           for file in ${{ steps.static-react-task.outputs.modified_files }}; do
-            echo "$file was added"
+            echo "$file was modified"
           done
       - name: Set output for static-react-task
         id: static-react-task_output
@@ -91,47 +91,78 @@ jobs:
           command-prefix: yarn dlx
           headless: true
 
-  # remote_procedure_template:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: 🔀 Checking out repo
-  #       uses: actions/checkout@v2
+  changed-files-template:
+    name: 🔎 Check for changed files for template
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Check if changed files for template
+        id: template
+        uses: tj-actions/changed-files@v23.1
+        with:
+          files: |
+            examples/remote_procedure/template
+            mephisto/abstractions
+            mephisto/data_model
+            mephisto/operations
+            mephisto/tools
+            packages/mephisto-task/src
+      - name: List all modified files
+        run: |
+          for file in ${{ steps.template.outputs.modified_files }}; do
+            echo "$file was modified"
+          done
+      - name: Set output for template
+        id: template_output
+        if: steps.template.outputs.any_changed == 'true'
+        run: |
+          echo "::set-output name=any_changed::true"
+    outputs:
+      template: steps.template_output.outputs.any_changed
 
-  #     - name: 🐍 Installing python
-  #       uses: actions/setup-python@v2
+  remote_procedure_template:
+    needs: [changed-files-template]
+    if: needs.changed-files-template.outputs.static-react-task == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🔀 Checking out repo
+        uses: actions/checkout@v2
 
-  #     - name: 🪨 Setup Node
-  #       uses: actions/setup-node@v1
-  #       with:
-  #         node-version: 16
+      - name: 🐍 Installing python
+        uses: actions/setup-python@v2
 
-  #     - name: 🤖 Install Mephisto
-  #       run: pip install -e .
+      - name: 🪨 Setup Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 16
 
-  #     - name: 🖋 Create data directory
-  #       run: mkdir -p ~/mephisto/data
+      - name: 🤖 Install Mephisto
+        run: pip install -e .
 
-  #     - name: 📂 Set the data directory
-  #       run: mephisto config core.main_data_directory ~/mephisto/data
+      - name: 🖋 Create data directory
+        run: mkdir -p ~/mephisto/data
 
-  #     - name: 📦 Setting up mephisto-task package
-  #       run: |
-  #         cd packages/mephisto-task
-  #         yarn install
-  #         yarn build
-  #         npm link
+      - name: 📂 Set the data directory
+        run: mephisto config core.main_data_directory ~/mephisto/data
 
-  #     - name: ⌛️ Running cypress tests
-  #       uses: cypress-io/github-action@v3.1.0
-  #       with:
-  #         install: false
-  #         browser: chrome
-  #         project: ./examples/remote_procedure/template/webapp
-  #         config-file: ./cypress.config.js
-  #         start: python examples/remote_procedure/template/run_task.py mephisto.task.post_install_script=link_mephisto_task.sh
-  #         wait-on: "http://localhost:3000/?worker_id=x&assignment_id=1"
-  #         command-prefix: yarn dlx
-  #         headless: true
+      - name: 📦 Setting up mephisto-task package
+        run: |
+          cd packages/mephisto-task
+          yarn install
+          yarn build
+          npm link
+
+      - name: ⌛️ Running cypress tests
+        uses: cypress-io/github-action@v3.1.0
+        with:
+          install: false
+          browser: chrome
+          project: ./examples/remote_procedure/template/webapp
+          config-file: ./cypress.config.js
+          start: python examples/remote_procedure/template/run_task.py mephisto.task.post_install_script=link_mephisto_task.sh
+          wait-on: "http://localhost:3000/?worker_id=x&assignment_id=1"
+          command-prefix: yarn dlx
+          headless: true
 
   # remote_procedure_mnist:
   #   runs-on: ubuntu-latest

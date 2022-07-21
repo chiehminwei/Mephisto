@@ -38,7 +38,7 @@ jobs:
 
   static-react-task:
     needs: [changed-files-static-react-task]
-    if: needs.changed-files-static-react-task.outputs.static-react-task == 'true'
+    if: ${{ needs.changed-files-static-react-task.outputs.static-react-task == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: 🔀 Checking out repo

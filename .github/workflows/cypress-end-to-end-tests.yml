@@ -2,7 +2,7 @@ name: cypress-end-to-end-tests
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [add-path-filters-to-cypress-tests]
 
 jobs:
   changes:

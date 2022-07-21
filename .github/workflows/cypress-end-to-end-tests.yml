@@ -53,7 +53,7 @@ jobs:
             mephisto-worker-addons:
               - 'packages/mephisto-worker-addons/src/**'
 
-  static-react-task:
+  1️⃣ static-react-task:
     needs: changes
     if: ${{ (needs.changes.outputs.static_react_task == 'true') || (needs.changes.outputs.mephisto-task == 'true') || (needs.changes.outputs.abstractions == 'true') || (needs.changes.outputs.data_model == 'true') || (needs.changes.outputs.operations == 'true') || (needs.changes.outputs.tools == 'true')}}
     runs-on: ubuntu-latest
@@ -97,7 +97,7 @@ jobs:
           command-prefix: yarn dlx
           headless: true
 
-  remote_procedure_template:
+  2️⃣ remote_procedure_template:
     needs: changes
     if: ${{ (needs.changes.outputs.template == 'true') || (needs.changes.outputs.mephisto-task == 'true') || (needs.changes.outputs.abstractions == 'true') || (needs.changes.outputs.data_model == 'true') || (needs.changes.outputs.operations == 'true') || (needs.changes.outputs.tools == 'true')}}
     runs-on: ubuntu-latest
@@ -141,7 +141,7 @@ jobs:
           command-prefix: yarn dlx
           headless: true
 
-  remote_procedure_mnist:
+  3️⃣ remote_procedure_mnist:
     needs: changes
     if: ${{ (needs.changes.outputs.mnist == 'true') || (needs.changes.outputs.mephisto-task == 'true') || (needs.changes.outputs.abstractions == 'true') || (needs.changes.outputs.data_model == 'true') || (needs.changes.outputs.operations == 'true') || (needs.changes.outputs.tools == 'true')}}
     runs-on: ubuntu-latest
@@ -187,7 +187,7 @@ jobs:
           command-prefix: yarn dlx
           headless: true
 
-  remote_procedure_toxicity_detection:
+  4️⃣ remote_procedure_toxicity_detection:
     needs: changes
     if: ${{ (needs.changes.outputs.toxicity_detection == 'true') || (needs.changes.outputs.mephisto-task == 'true') || (needs.changes.outputs.abstractions == 'true') || (needs.changes.outputs.data_model == 'true') || (needs.changes.outputs.operations == 'true') || (needs.changes.outputs.tools == 'true')}}
     runs-on: ubuntu-latest
@@ -231,7 +231,7 @@ jobs:
           command-prefix: yarn dlx
           headless: true
 
-  static_react_task_with_tips:
+  5️⃣ static_react_task_with_tips:
     needs: changes
     if: ${{ (needs.changes.outputs.static_react_task_with_tips == 'true') || (needs.changes.outputs.mephisto-task == 'true') || (needs.changes.outputs.mephisto-worker-addons == 'true') || (needs.changes.outputs.abstractions == 'true') || (needs.changes.outputs.data_model == 'true') || (needs.changes.outputs.operations == 'true') || (needs.changes.outputs.tools == 'true')}}
     runs-on: ubuntu-latest

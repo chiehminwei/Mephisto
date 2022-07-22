@@ -419,6 +419,8 @@ def get_help_arguments(args):
             arg_values = [str(x) for x in arg_values]
             args_table.add_row(*arg_values)
         console.print(args_table)
+        if abstraction != "blueprint":
+            return [args_table]
     if abstraction == "blueprint":
         state_args = get_task_state_dicts(target_class)[0]["args"]
         if len(args) > 1:
@@ -440,6 +442,7 @@ def get_help_arguments(args):
                 arg_values = [str(x) for x in arg_values]
                 state_args_table.add_row(*arg_values)
             console.print(state_args_table)
+            return [args_table, state_args_table]
 
 
 @cli.command(

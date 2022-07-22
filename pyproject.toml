@@ -66,7 +66,7 @@ click = "^7.0"
 click_default_group = "^1.2"
 tabulate = "^0.8.7"
 rich = "^10.16.2"
-rich-tools = "^0.4.0"
+rich-tools = "0.5.0"
 rich-click = "^1.5.1"
 
 # [tool.poetry.group.metrics.dependencies]
